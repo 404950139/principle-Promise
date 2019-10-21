@@ -15,13 +15,14 @@
         let oP = new MyPromise( (res, rej) => {
             setTimeout(() => {
                 res(1111);
-            }, 0);
+            }, 1000);
         });
         oP.then(res => {
             console.log(res, "ok");
         }, rej => {
             console.log(rej, "fail");
         })
+
     </script>
 </body>
 </html>
