@@ -40,23 +40,29 @@ function MyPromise(executor) {
 
 MyPromise.prototype.then = function(onFulfilled, onRejected) {
   var self = this;
-  if (self.status === "Fulfilled") {
-
-    // 执行成功的回调
-    onFulfilled(self.resolveValue);
-  }
-  if (self.status === "Rejected") {
-    // 执行失败的回调
-    onRejected(self.rejectReason);
-  }
-  // 执行异步操作的时候不会改变状态，所以状态还是pending
-  if (self.status === "pending") {
-    // 把失败和成功的回调放到对应的数组中
-    self.ResolveCallBackList.push(function() {
-      onFulfilled(self.resolveValue);
-    });
-    self.RejectCallBackList.push(function() {
-      onRejected(self.rejectReason);
-    });
-  }
+  var nextPromise = new MyPromise(function(res, rej) {
+    if (self.status === "Fulfilled") {
+      // 执行成功的回调
+      var nextResolveValue = onFulfilled(self.resolveValue);
+      res(nextResolveValue);
+    }
+    if (self.status === "Rejected") {
+      // 执行失败的回调
+      var nextRejectReason = onRejected(self.rejectReason);
+      res(nextRejectReason);
+    }
+    // 执行异步操作的时候不会改变状态，所以状态还是pending
+    if (self.status === "pending") {
+      // 把失败和成功的回调放到对应的数组中
+      self.ResolveCallBackList.push(function() {
+        var nextResolveValue = onFulfilled(self.resolveValue);
+        res(nextResolveValue);
+      });
+      self.RejectCallBackList.push(function() {
+        var nextRejectReason = onRejected(self.rejectReason);
+        res(nextRejectReason);
+      });
+    }
+  });
+  return nextPromise;
 };
