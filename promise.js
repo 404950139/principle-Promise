@@ -39,28 +39,72 @@ function MyPromise(executor) {
 }
 
 MyPromise.prototype.then = function(onFulfilled, onRejected) {
+  // 如果没有onFulfilled,直接将当前then的值抛给下一个then
+  if (!onFulfilled) {
+    onFulfilled = function (val) {
+      return val;
+    }
+  };
+  // 如果没有onRejected，直接将当前then的错误通过throw抛给下一个then
+  if (!onRejected) {
+    onRejected = function (reason) {
+      throw new Error(reason);
+    }
+  };
   var self = this;
   var nextPromise = new MyPromise(function(res, rej) {
     if (self.status === "Fulfilled") {
-      // 执行成功的回调
-      var nextResolveValue = onFulfilled(self.resolveValue);
-      res(nextResolveValue);
+      // 模拟then的异步执行
+      setTimeout(function() {
+        // 通过try catch来捕获执行中的错误
+        try {
+          // 执行成功的回调
+          var nextResolveValue = onFulfilled(self.resolveValue);
+          res(nextResolveValue);
+        } catch (e) {
+          rej(e);
+        }
+      }, 0);
     }
     if (self.status === "Rejected") {
-      // 执行失败的回调
-      var nextRejectReason = onRejected(self.rejectReason);
-      res(nextRejectReason);
+      // 模拟then的异步执行
+      setTimeout(function() {
+        // 通过try catch来捕获执行中的错误
+        try {
+          // 执行失败的回调
+          var nextRejectReason = onRejected(self.rejectReason);
+          res(nextRejectReason);
+        } catch (e) {
+          rej(e);
+        }
+      }, 0);
     }
     // 执行异步操作的时候不会改变状态，所以状态还是pending
     if (self.status === "pending") {
       // 把失败和成功的回调放到对应的数组中
       self.ResolveCallBackList.push(function() {
-        var nextResolveValue = onFulfilled(self.resolveValue);
-        res(nextResolveValue);
+        // 模拟then的异步执行
+        setTimeout(function() {
+          // 通过try catch来捕获执行中的错误
+          try {
+            var nextResolveValue = onFulfilled(self.resolveValue);
+            res(nextResolveValue);
+          } catch (e) {
+            rej(e);
+          }
+        }, 0);
       });
       self.RejectCallBackList.push(function() {
-        var nextRejectReason = onRejected(self.rejectReason);
-        res(nextRejectReason);
+        // 模拟then的异步执行
+        setTimeout(function() {
+          // 通过try catch来捕获执行中的错误
+          try {
+            var nextRejectReason = onRejected(self.rejectReason);
+            res(nextRejectReason);
+          } catch (e) {
+            rej(e);
+          }
+        }, 0);
       });
     }
   });

@@ -19,13 +19,15 @@
         });
         oP.then(res => {
             console.log(res, "ok");
+            throw new Error("出错了");
         }, rej => {
             console.log(rej, "fail");
         }).then(res => {
             console.log(111);
         }, rej => {
-            console.log(222);
-        })
+            console.log(222, rej);
+        });
+        console.log("外面");
 
     </script>
 </body>
