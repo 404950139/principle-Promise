@@ -41,11 +41,14 @@ function MyPromise(executor) {
 function ResolutionReturnPromise(nextPromise, returnValue, res, rej) {
   // 如果返回值是一个Promise对象
   if (returnValue instanceof MyPromise) {
-    returnValue.then(function (val) {
-      res(val);
-    }, function (reason) {
-      rej(reason);
-    });
+    returnValue.then(
+      function(val) {
+        res(val);
+      },
+      function(reason) {
+        rej(reason);
+      }
+    );
   } else {
     res(returnValue);
   }
@@ -122,4 +125,13 @@ MyPromise.prototype.then = function(onFulfilled, onRejected) {
     }
   });
   return nextPromise;
+};
+
+// 通过循环来执行promise，先执行的就会先改变状态，改变完状态之后状态就不会再改变了，所以后面的就不会再触发
+MyPromise.prototype.race = function(promiseArr) {
+  return new MyPromise(function(resolve, reject) {
+    promiseArr.forEach(function(promise, index) {
+      promise.then(resolve, reject);
+    });
+  });
 };
