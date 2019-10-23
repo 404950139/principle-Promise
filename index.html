@@ -19,7 +19,9 @@
         });
         oP.then(res => {
             console.log(res, "ok");
-            throw new Error("出错了");
+            return new MyPromise((res, rej) => {
+                rej(123123);
+            })
         }, rej => {
             console.log(rej, "fail");
         }).then(res => {

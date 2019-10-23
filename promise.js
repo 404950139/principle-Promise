@@ -38,19 +38,32 @@ function MyPromise(executor) {
   }
 }
 
+function ResolutionReturnPromise(nextPromise, returnValue, res, rej) {
+  // 如果返回值是一个Promise对象
+  if (returnValue instanceof MyPromise) {
+    returnValue.then(function (val) {
+      res(val);
+    }, function (reason) {
+      rej(reason);
+    });
+  } else {
+    res(returnValue);
+  }
+}
+
 MyPromise.prototype.then = function(onFulfilled, onRejected) {
   // 如果没有onFulfilled,直接将当前then的值抛给下一个then
   if (!onFulfilled) {
-    onFulfilled = function (val) {
+    onFulfilled = function(val) {
       return val;
-    }
-  };
+    };
+  }
   // 如果没有onRejected，直接将当前then的错误通过throw抛给下一个then
   if (!onRejected) {
-    onRejected = function (reason) {
+    onRejected = function(reason) {
       throw new Error(reason);
-    }
-  };
+    };
+  }
   var self = this;
   var nextPromise = new MyPromise(function(res, rej) {
     if (self.status === "Fulfilled") {
@@ -60,7 +73,7 @@ MyPromise.prototype.then = function(onFulfilled, onRejected) {
         try {
           // 执行成功的回调
           var nextResolveValue = onFulfilled(self.resolveValue);
-          res(nextResolveValue);
+          ResolutionReturnPromise(nextPromise, nextResolveValue, res, rej);
         } catch (e) {
           rej(e);
         }
@@ -73,7 +86,7 @@ MyPromise.prototype.then = function(onFulfilled, onRejected) {
         try {
           // 执行失败的回调
           var nextRejectReason = onRejected(self.rejectReason);
-          res(nextRejectReason);
+          ResolutionReturnPromise(nextPromise, nextRejectReason, res, rej);
         } catch (e) {
           rej(e);
         }
@@ -88,7 +101,7 @@ MyPromise.prototype.then = function(onFulfilled, onRejected) {
           // 通过try catch来捕获执行中的错误
           try {
             var nextResolveValue = onFulfilled(self.resolveValue);
-            res(nextResolveValue);
+            ResolutionReturnPromise(nextPromise, nextResolveValue, res, rej);
           } catch (e) {
             rej(e);
           }
@@ -100,7 +113,7 @@ MyPromise.prototype.then = function(onFulfilled, onRejected) {
           // 通过try catch来捕获执行中的错误
           try {
             var nextRejectReason = onRejected(self.rejectReason);
-            res(nextRejectReason);
+            ResolutionReturnPromise(nextPromise, nextRejectReason, res, rej);
           } catch (e) {
             rej(e);
           }
